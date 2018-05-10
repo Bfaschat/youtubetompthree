@@ -1,0 +1,16 @@
+version: '3'
+services:
+  bot:
+    build: .
+    command: npm run start:dev
+    depends_on:
+      - db
+    environment:
+      - BOT_TOKEN=
+      - WEBHOOK_URL=
+      - HOST=0.0.0.0
+      - PORT=3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/code
