@@ -106,12 +106,12 @@ def convert_to_milliseconds(time):
 def process_description(description):
     files_to_process = []
     lines = description.split('\n')
-    expression = r'^(\D*)(\d{0,2}[:]?\d{0,2}:\d{0,2})(\D*)$'
+    expression = r'^(\D*)(\d{1,2}[:]?\d{1,2}:\d{1,2})(\D*)$'
     for index, line in enumerate(lines):
         m = re.search(expression, line)
         if m:
             title = m.group(1) or m.group(3)
-
+            logger.info(f"{title} {m.group(2)}")
             start_position = convert_to_milliseconds(m.group(2))
 
             files_to_process.append({
