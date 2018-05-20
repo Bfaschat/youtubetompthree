@@ -143,7 +143,7 @@ def cut_audio_and_save(audio, album_title, from_, to_, title):
 
 def split_audio(bot, update):
     update_type = update.message or update.channel_post
-    command, vid_url = update_type.text.split('/album ')
+    command, vid_url = update_type.text.split('album ')
     message_id = update_type.message_id
     try:
         video_info = youtubeconverter.extract_info(vid_url)

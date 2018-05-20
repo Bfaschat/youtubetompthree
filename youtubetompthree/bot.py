@@ -34,7 +34,7 @@ def setup_and_configure_bot(token):
     dispatcher = __get_updater(token).dispatcher
 
     album_handler = MessageHandler(
-        AlbumFeature,
+        AlbumFeature(),
         handlers.split_audio
     )
     youtube_links_handler = MessageHandler(
