@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='youtubetompthree',
-    version='1.1.0',
+    version='1.2.0',
     description='Telegram bot to download songs from Youtube',
     author='Jon Ander Besga',
     author_email='jon@wearejavit.com',

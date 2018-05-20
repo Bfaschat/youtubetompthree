@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "254c96aedbca8f74cc74ba758a83a629accc3a72fe795388ce6826213f60340f"
+            "sha256": "24381c54033c8afa062f26ec148bbd1cf6c9b5f0ecdc92d0ca177104cea74b8f"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -18,10 +18,10 @@
     "default": {
         "certifi": {
             "hashes": [
-                "sha256:14131608ad2fd56836d33a71ee60fa1c82bc9d2c8d98b7bdbc631fe1b3cd1296",
-                "sha256:edbc3f203427eef571f79a7692bb160a2b0f7ccaa31953e99bd17e307cf63f7d"
+                "sha256:13e698f54293db9f89122b0581843a782ad0934a4fe0172d2a980ba77fc61bb7",
+                "sha256:9fa520c1bacfb634fa7af20a76bcbd3d5fb390481724c597da32c719a7dca4b0"
             ],
-            "version": "==2018.1.18"
+            "version": "==2018.4.16"
         },
         "future": {
             "hashes": [
@@ -29,21 +29,29 @@
             ],
             "version": "==0.16.0"
         },
-        "python-telegram-bot": {
+        "pydub": {
             "hashes": [
-                "sha256:580390d75a63706647962556bab69c7313bee1438411288c37f545e421498e6c",
-                "sha256:caa89c0eb1e5284ec0d02d6a9a4d6dc1b7db356c16fcde0a4472c4613b742c6e"
+                "sha256:19eb8ec423e7a2bcee2f1cf6ceeaf433ee57f404ab2d892aaf4f6752cef265da",
+                "sha256:27acc5977b0f5220682175d44fda737bbf818143b0832c0c3863b5dde38e197a"
             ],
             "index": "pypi",
-            "version": "==10.0.1"
+            "version": "==0.21.0"
+        },
+        "python-telegram-bot": {
+            "hashes": [
+                "sha256:725a28f77a04d056559015963a21eacf5d2d1f1722192237284828b7cc437465",
+                "sha256:ca2f8a44ddef7271477e16f4986647fa90ef4df5b55a7953e53b9c9d2672f639"
+            ],
+            "index": "pypi",
+            "version": "==10.1.0"
         },
         "youtube-dl": {
             "hashes": [
-                "sha256:ddbe6ea150746d58af3b0177f6623953a7158e0ae3f1c1c38860e2e5a8e2d52b",
-                "sha256:f10e4fcdd7d4093aef488d4afb5c88b6812dbbc4e47d42459573e83cd2023f00"
+                "sha256:a53b33fff5b6cc8c776a35c0e137a1e25d60726173958ede031b1dcc578d20f8",
+                "sha256:e4f9c9ac238e1c32195857e458a64f680085b89c2fd1b267af35bd8fb9b0ea9a"
             ],
             "index": "pypi",
-            "version": "==2018.3.26.1"
+            "version": "==2018.5.18"
         }
     },
     "develop": {}
