@@ -109,7 +109,7 @@ def convert_to_milliseconds(time):
 def process_description(description):
     files_to_process = []
     lines = description.split('\n')
-    expression = r'^(\D*)(\d{1,2}[:]?\d{1,2}:\d{1,2})(\D*)$'
+    expression = r'^(\D*)(\d{1,2}[:]?\d{1,2}:\d{1,2})[ \- ]*(\D*)$'
     for index, line in enumerate(lines):
         m = re.search(expression, line)
         if m:
