@@ -103,6 +103,9 @@ def convert_to_milliseconds(time):
     return milliseconds
 
 
+# TODO: Storage of voting per chat_id and persistent
+# TODO: Timeouts. Disorder of messages
+# TODO: Refactor code
 def process_description(description):
     files_to_process = []
     lines = description.split('\n')
@@ -115,9 +118,9 @@ def process_description(description):
             start_position = convert_to_milliseconds(m.group(2))
 
             files_to_process.append({
-                "title": title,
+                "title": title.strip(),
                 "start": start_position,
-                "end": 0
+                "end": None
             })
 
             if start_position != 0:
