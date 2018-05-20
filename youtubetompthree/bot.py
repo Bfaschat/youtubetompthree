@@ -1,5 +1,5 @@
 import logging
-from telegram.ext import MessageHandler, Filters, CallbackQueryHandler, CommandHandler
+from telegram.ext import MessageHandler, Filters, CallbackQueryHandler
 from telegram.ext import Updater
 from telegram.messageentity import MessageEntity
 
@@ -22,14 +22,27 @@ def setup_bot(token):
     return __get_updater(token)
 
 
+from telegram.ext import BaseFilter
+
+
+class AlbumFeature(BaseFilter):
+    def filter(self, message):
+        return message.text.startswith('album ')
+
+
 def setup_and_configure_bot(token):
     dispatcher = __get_updater(token).dispatcher
 
+    album_handler = MessageHandler(
+        AlbumFeature,
+        handlers.split_audio
+    )
     youtube_links_handler = MessageHandler(
         Filters.entity(MessageEntity.URL),
         handlers.youtube_links
     )
-    dispatcher.add_handler(CommandHandler('album', handlers.split_audio))
+
+    dispatcher.add_handler(album_handler)
     dispatcher.add_handler(youtube_links_handler)
     dispatcher.add_handler(CallbackQueryHandler(handlers.vote_song))
 
