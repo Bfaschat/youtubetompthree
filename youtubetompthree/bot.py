@@ -1,6 +1,6 @@
 import logging
 
-from telegram.ext import MessageHandler, Filters
+from telegram.ext import MessageHandler, Filters, CallbackQueryHandler
 from telegram.ext import Updater
 from telegram.messageentity import MessageEntity
 
@@ -31,5 +31,6 @@ def setup_and_configure_bot(token):
         handlers.youtube_links
     )
     dispatcher.add_handler(youtube_links_handler)
+    dispatcher.add_handler(CallbackQueryHandler(handlers.vote_song))
 
     return updater
