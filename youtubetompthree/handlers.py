@@ -71,12 +71,15 @@ def youtube_links(bot, update):
             InlineKeyboardButton("👎", callback_data='thumbs_down')
         ]
     ]
-    bot.sendAudio(
-        chat_id=update_type.chat_id,
-        audio=file,
-        title=video_info['title'],
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    try:
+        bot.sendAudio(
+            chat_id=update_type.chat_id,
+            audio=file,
+            title=video_info['title'],
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+    except telegram.error.TimedOut:
+        logger.info('Taking too long..raised an TimedOut exception. Catched.')
 
     file.close()
 
