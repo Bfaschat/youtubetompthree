@@ -33,6 +33,7 @@ def run_polling():
     logger.info('Polling started!')
 
     updater.start_polling()
+    updater.idle()
 
 
 if __name__ == '__main__':
