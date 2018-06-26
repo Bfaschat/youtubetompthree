@@ -1,8 +1,6 @@
 import time
 
 import logging
-import os
-import re
 import telegram
 import youtube_dl
 from pydub import AudioSegment
@@ -10,78 +8,37 @@ from telegram import InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.error import BadRequest
 
 from youtubetompthree import youtubeconverter
+from youtubetompthree.db import user_has_voted, get_song_votes, get_or_create_song, \
+    add_vote_to_song
+from youtubetompthree.utils import get_or_download_video, process_description, \
+    cut_audio_and_save
 
 logger = logging.getLogger(__name__)
 
-SONGS = {}
 
-
-def vote_song(bot, update):
-    query = update.callback_query
-    message_id = query.message.message_id
-    user_voting = query.from_user.id
-
-    if message_id not in SONGS:
-        SONGS[message_id] = {
-            "thumbs_up": 0,
-            "thumbs_down": 0,
-            "have_voted": []
-        }
-
-    if user_voting not in SONGS[message_id]["have_voted"]:
-        if query.data == 'thumbs_up':
-            SONGS[message_id]['thumbs_up'] += 1
-        elif query.data == 'thumbs_down':
-            SONGS[message_id]['thumbs_down'] += 1
-        SONGS[message_id]['have_voted'].append(user_voting)
-
-        votes_up = SONGS[message_id]['thumbs_up']
-        votes_down = SONGS[message_id]['thumbs_down']
-
-        keyboard = [
-            [
-                InlineKeyboardButton(f"👍 {votes_up if votes_up else ''}", callback_data='thumbs_up'),
-                InlineKeyboardButton(f"👎 {votes_down if votes_down else ''}", callback_data='thumbs_down')
-            ]
-        ]
-        query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(keyboard))
-    else:
-        query.answer()
-
-
-def get_or_download_video(title, vid_url):
-    try:
-        return open(f'audio/{title}.mp3', 'rb')
-    except FileNotFoundError:
-        youtubeconverter.convert_video(vid_url)
-        return open(f'audio/{title}.mp3', 'rb')
-
-
-def youtube_links(bot, update):
+def download_audio(bot, update):
     update_type = update.message or update.channel_post
 
-    video_info = youtubeconverter.extract_info(update_type.text)
+    video_info = youtubeconverter.convert_video(update_type.text, download=False)
     restricted_title = youtubeconverter.get_restricted_filename(video_info['title'])
 
-    file = get_or_download_video(restricted_title, update_type.text)
+    file_location = get_or_download_video(restricted_title, update_type.text)
 
-    keyboard = [
-        [
-            InlineKeyboardButton("👍", callback_data='thumbs_up'),
-            InlineKeyboardButton("👎", callback_data='thumbs_down')
-        ]
-    ]
     try:
-        bot.sendAudio(
-            chat_id=update_type.chat_id,
-            audio=file,
-            title=video_info['title'],
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
+        with open(file_location, 'rb') as fd:
+            bot.sendAudio(
+                chat_id=update_type.chat_id,
+                audio=fd,
+                title=video_info['title'],
+                reply_markup=InlineKeyboardMarkup([
+                    [
+                        InlineKeyboardButton("👍", callback_data='like'),
+                        InlineKeyboardButton("👎", callback_data='dislike')
+                    ]
+                ])
+            )
     except telegram.error.TimedOut:
-        logger.info('Taking too long..raised an TimedOut exception. Catched.')
-
-    file.close()
+        logger.info('Telegram is taking too long..raised an TimedOut exception. Catched.')
 
     try:
         bot.deleteMessage(
@@ -89,72 +46,41 @@ def youtube_links(bot, update):
             message_id=update_type.message_id
         )
     except BadRequest:
-        # Probably message that can not be deleted
+        # Probably a message that can not be deleted
         pass
 
 
-def convert_to_milliseconds(time):
-    t = time.split(':')
+def vote_song(bot, update):
+    query = update.callback_query
+    message_id = query.message.message_id
+    chat_id = query.chat_id
+    user_id = query.from_user.id
 
-    seconds = int(t[-1]) * 1000
-    minutes = int(t[-2]) * 60 * 1000
-    milliseconds = seconds + minutes
-    if len(t) > 2:
-        hours = int(t[-3]) * 60 * 60 * 1000
-        milliseconds += hours
+    song = get_or_create_song(chat_id, message_id)
+    if user_has_voted(user_id, song):
+        query.answer()
+        return
 
-    return milliseconds
+    add_vote_to_song(song, user_id, query.data)
+
+    likes, dislikes = get_song_votes(song)
+
+    query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup([
+        [
+            InlineKeyboardButton(f"👍 {likes}", callback_data='like'),
+            InlineKeyboardButton(f"👎 {dislikes}", callback_data='dislike')
+        ]
+    ]))
 
 
-# TODO: Storage of voting per chat_id and persistent
 # TODO: Timeouts. Disorder of messages
 # TODO: Refactor code
-def process_description(description):
-    files_to_process = []
-    lines = description.split('\n')
-    expression = r'^(.*?)(\d{1,2}:\d{1,2})(.*?)$'
-
-    for index, line in enumerate(lines):
-        m = re.search(expression, line)
-        if m:
-            title = m.group(1) or m.group(3)
-            title = title.replace('-', '').strip(' ')
-            logger.info(f"{title} {m.group(2)}")
-            start_position = convert_to_milliseconds(m.group(2))
-
-            files_to_process.append({
-                "title": title.strip(),
-                "start": start_position,
-                "end": None
-            })
-
-            if start_position != 0:
-                files_to_process[index - 1]['end'] = start_position
-        else:
-            files_to_process.append({})
-
-    return files_to_process
-
-
-def cut_audio_and_save(audio, album_title, from_, to_, title):
-    album_folder = f'audio/albums/{album_title}'
-    if not os.path.exists(album_folder):
-        os.mkdir(album_folder)
-
-    logger.info(f'{title} | {from_}:{to_}')
-    filename = os.path.join(album_folder, f'{title}.mp3')
-    if not os.path.exists(filename):
-        new_audio = audio[from_:to_]
-        new_audio.export(filename, format="mp3")
-    return {'title': title, 'file': filename}
-
-
 def split_audio(bot, update):
     update_type = update.message or update.channel_post
     command, vid_url = update_type.text.split('album ')
     message_id = update_type.message_id
     try:
-        video_info = youtubeconverter.extract_info(vid_url)
+        video_info = youtubeconverter.convert_video(vid_url, download=False)
         restricted_title = youtubeconverter.get_restricted_filename(video_info['title'])
         bot
         files_to_process = process_description(video_info['description'])

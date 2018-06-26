@@ -11,7 +11,7 @@ setup(
         'Programming Language :: Python :: 3.6',
     ],
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
-    entry_points={  # Optional
+    entry_points={
         'console_scripts': [
             'youtubetompthree=youtubetompthree.__main__:run_webhook',
             'youtubetompthree-polling=youtubetompthree.__main__:run_polling'

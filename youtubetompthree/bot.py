@@ -4,6 +4,7 @@ from telegram.ext import Updater
 from telegram.messageentity import MessageEntity
 
 from youtubetompthree import handlers
+from youtubetompthree.filters import AlbumFilter
 
 logger = logging.getLogger(__name__)
 
@@ -18,28 +19,13 @@ def __get_updater(token):
     return updater
 
 
-def setup_bot(token):
-    return __get_updater(token)
-
-
-from telegram.ext import BaseFilter
-
-
-class AlbumFeature(BaseFilter):
-    def filter(self, message):
-        return message.text.startswith('album ')
-
-
 def setup_and_configure_bot(token):
     dispatcher = __get_updater(token).dispatcher
 
-    album_handler = MessageHandler(
-        AlbumFeature(),
-        handlers.split_audio
-    )
+    album_handler = MessageHandler(AlbumFilter(), handlers.split_audio)
     youtube_links_handler = MessageHandler(
         Filters.entity(MessageEntity.URL),
-        handlers.youtube_links
+        handlers.download_audio
     )
 
     dispatcher.add_handler(album_handler)

@@ -13,14 +13,9 @@ ydl_opts = {
 }
 
 
-def extract_info(youtube_url):
+def convert_video(youtube_url, download=True):
     with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        return ydl.extract_info(youtube_url, download=False)
-
-
-def convert_video(youtube_url):
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-        return ydl.extract_info(youtube_url)
+        return ydl.extract_info(youtube_url, download=download)
 
 
 def get_restricted_filename(youtube_title):
